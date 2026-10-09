@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CATEGORIES, ProductDraftSchema } from "@/lib/products";
@@ -7,18 +8,19 @@ import type { Product, ProductDraft } from "@/lib/products";
 
 type ProductFormProps = {
     editing: Product | null;
-    onSave: (draft: ProductDraft) => void;
-    onCancel: () => void;
+    onSave: (draft: ProductDraft) => void | Promise<void>;
+    onCancel: () => void | Promise<void>;
 };
 
 export default function ProductForm(
     { editing, onSave, onCancel }: ProductFormProps
 ) {
+    const [saveError, setSaveError] = useState("");
     const {
         register,
         handleSubmit,
         reset,
-        formState: { errors, isDirty, isValid },
+        formState: { errors, isDirty, isValid, isSubmitting },
     } = useForm<ProductDraft>({
         resolver: zodResolver(ProductDraftSchema),
         mode: "onTouched",
@@ -30,16 +32,27 @@ export default function ProductForm(
             : { title: "", price: undefined, stock: undefined },
     });
 
-    function saveProduct(values: ProductDraft) {
-        onSave(values);
-        reset();
+    async function saveProduct(values: ProductDraft) {
+        setSaveError("");
+        try {
+            await onSave(values);
+            reset();
+        } catch (error) {
+            setSaveError(
+                error instanceof Error ? error.message : "บันทึกสินค้าไม่สำเร็จ"
+            );
+        }
     }
 
     return (
         <form className="product-form" onSubmit={handleSubmit(saveProduct)} noValidate>
             <div className="form-header">
+                <span className="eyebrow">{editing ? "UPDATE PRODUCT" : "NEW PRODUCT"}</span>
                 <h2>{editing ? "แก้ไขสินค้า" : "เพิ่มสินค้า"}</h2>
+                <p>กรอกรายละเอียดสินค้าให้ครบถ้วนก่อนบันทึก</p>
             </div>
+
+            {saveError && <p role="alert">{saveError}</p>}
 
             <div className="field-group">
                 <label htmlFor="title">ชื่อสินค้า</label>
@@ -90,8 +103,8 @@ export default function ProductForm(
             </div>
 
             <div className="form-actions">
-                <button className="submit-button" type="submit" disabled={!isDirty || !isValid}>
-                    {editing ? "บันทึกการแก้ไข" : "เพิ่มสินค้า"}
+                <button className="submit-button" type="submit" disabled={!isDirty || !isValid || isSubmitting}>
+                    {isSubmitting ? "กำลังบันทึก" : editing ? "บันทึกการแก้ไข" : "เพิ่มสินค้า"}
                 </button>
 
                 {editing && (

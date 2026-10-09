@@ -64,74 +64,89 @@ export default function ProductExplorer() {
 
   return (
     <main className="product-explorer">
-      <h1 className="page-title">รายการสินค้า</h1>
-
-      <button
-        type="button"
-        className="load-button"
-        onClick={() => loadProducts(defaultQuery)}
-        disabled={status === "loading"}
-      >
-        {status === "loading" ? "กำลังโหลด" : "โหลดข้อมูล"}
-      </button>
+      <div className="page-heading">
+        <div>
+          <span className="eyebrow">PRODUCT MANAGEMENT</span>
+          <h1 className="page-title">จัดการสินค้า</h1>
+          <p className="page-subtitle">ค้นหา ดูแล และจัดการรายการสินค้าของคุณในที่เดียว</p>
+        </div>
+        <button
+          type="button"
+          className="load-button"
+          onClick={() => loadProducts(defaultQuery)}
+          disabled={status === "loading"}
+        >
+          {status === "loading" ? "กำลังโหลด..." : "โหลดข้อมูลใหม่"}
+        </button>
+      </div>
 
       <ProductSearchForm onSearch={loadProducts} />
 
-      {<section className="product-panel" aria-live="polite">
-        {/*status === "idle" && <p>คลิกปุ่มโหลดข้อมูลเพื่อเริ่ม</p>*/}
+      <section className="product-panel" aria-live="polite">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">YOUR CATALOG</span>
+            <h2>รายการสินค้า</h2>
+          </div>
+          {status === "ready" && (
+            <span className="result-count">{products.length} รายการ</span>
+          )}
+        </div>
 
-        {status === "loading" && <p>กำลังโหลดข้อมูล</p>}
+        {status === "loading" && <p className="panel-message">กำลังโหลดข้อมูลสินค้า...</p>}
 
-        {status === "error" && <p role="alert">{errorMessage}</p>}
+        {status === "error" && <p className="panel-message error-message" role="alert">{errorMessage}</p>}
 
         {status === "ready" && products.length === 0 && (
-          <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
+          <p className="panel-message">ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
         )}
 
         {status === "ready" && products.length > 0 && (
-          <table className="product-table">
-            <thead>
-              <tr>
-                <th>รูป</th>
-                <th>ชื่อสินค้า</th>
-                <th>ราคา</th>
-                <th>คงเหลือ</th>
-                <th>หมวดหมู่</th>
-                <th>จัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((item) => (
-                <tr key={item.id}>
-                  <td className="image-cell">
-                    <img className="product-image" src={item.thumbnail ?? item.image ?? item.images?.[0]} alt={item.title} width="100" />
-                  </td>
-                  <td>{item.title}</td>
-                  <td>{item.price}</td>
-                  <td>{item.stock}</td>
-                  <td>{item.category}</td>
-                  <td className="row-actions">
-                    <button
-                      type="button"
-                      className="row-action-button"
-                      onClick={() => setEditingId(item.id)}
-                    >
-                      แก้ไข
-                    </button>
-                    <button
-                      type="button"
-                      className="row-action-button delete-button"
-                      onClick={() => removeProduct(item.id)}
-                    >
-                      ลบ
-                    </button>
-                  </td>
+          <div className="table-scroll">
+            <table className="product-table">
+              <thead>
+                <tr>
+                  <th>รูปสินค้า</th>
+                  <th>ชื่อสินค้า</th>
+                  <th>ราคา</th>
+                  <th>คงเหลือ</th>
+                  <th>หมวดหมู่</th>
+                  <th>จัดการ</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {products.map((item) => (
+                  <tr key={item.id}>
+                    <td className="image-cell">
+                      <img className="product-image" src={item.thumbnail ?? item.image ?? item.images?.[0]} alt={item.title} width="100" />
+                    </td>
+                    <td className="product-name">{item.title}</td>
+                    <td className="price-value">{item.price}</td>
+                    <td>{item.stock}</td>
+                    <td><span className="category-chip">{item.category}</span></td>
+                    <td className="row-actions">
+                      <button
+                        type="button"
+                        className="row-action-button"
+                        onClick={() => setEditingId(item.id)}
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        type="button"
+                        className="row-action-button delete-button"
+                        onClick={() => removeProduct(item.id)}
+                      >
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </section>}
+      </section>
       
       <ProductForm
         key={editingId ?? "new"}

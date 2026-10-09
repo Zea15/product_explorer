@@ -2,7 +2,11 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SORT_FIELDS, defaultQuery, SearchQuerySchema } from "@/lib/products";
+import {
+    defaultQuery,
+    SORT_FIELDS,
+    SearchQuerySchema,
+} from "@/lib/products";
 import type { SearchQuery } from "@/lib/products";
 
 type ProductSearchFormProps = {
@@ -14,27 +18,23 @@ type ProductSearchFormProps = {
 export default function ProductSearchForm(
     { onSearch }: ProductSearchFormProps
 ) {
-    //const { register } = useForm<SearchQuery>({
-    //defaultValues: defaultQuery,
-    //});
-    //const {
-    //register,
-    //formState: { errors },
-//} = useForm<SearchQuery>({
-    // เติม: ตัวเชื่อมที่ทำให้ React Hook Form ตรวจข้อมูลด้วย Zod Schema
-    //resolver: zodResolver(SearchQuerySchema),
-   // mode: "onTouched",
-   // defaultValues: defaultQuery,
-//});
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<SearchQuery>({ /* ตัวเลือกเดิม */ });
+    } = useForm<SearchQuery>({
+        resolver: zodResolver(SearchQuerySchema),
+        defaultValues: defaultQuery,
+        mode: "onTouched",
+    });
 
     return (
-        // เติม: เมธอดของ useForm ที่ห่อฟังก์ชันก่อนส่งให้ onSubmit
         <form className="search-form" onSubmit={handleSubmit(onSearch)} noValidate>
+            <div className="form-intro">
+                <span className="eyebrow">FIND A PRODUCT</span>
+                <h2>ค้นหาและจัดเรียง</h2>
+                <p>ระบุคำค้นและตัวเลือกเพื่อค้นหาสินค้าที่ต้องการ</p>
+            </div>
             <div className="field-group">
                 <label htmlFor="q">คำค้น</label>
                 <input className="form-input" id="q" {...register("q")} placeholder="phone" />
